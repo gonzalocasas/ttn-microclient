@@ -12,8 +12,8 @@ It is completely self-contained: you can host it locally or deploy it to a provi
 
 ## Getting Started
 
-- Clone this repository
-- Install dependencies
+- Clone this repository and open a terminal in that directory
+- Install dependencies:
 
         $ npm install
 
