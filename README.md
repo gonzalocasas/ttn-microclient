@@ -10,18 +10,18 @@ It is completely self-contained: you can host it locally or deploy it to a provi
 * [Node.JS](https://nodejs.org/)
 * An account and application in the [Dashboard](https://staging.thethingsnetwork.org/).
 
-Install dependencies:
-
-    $ npm install
-
-
 ## Getting Started
 
-Run the server:
+- Clone this repository
+- Install dependencies
 
-    $ npm start
+        $ npm install
 
-Browse to [localhost:8080](http://localhost:8080/)
+- Run it:
+
+        $ npm start
+
+- Browse to [localhost:8080](http://localhost:8080/)
 
 
 ## Deploying
