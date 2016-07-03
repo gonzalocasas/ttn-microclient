@@ -7,7 +7,7 @@ It is completely self-contained: you can host it locally or deploy it to a provi
 
 ## Prerequisites
 
-* [Node.JS](https://nodejs.org/)
+* [Node.JS](https://nodejs.org/) (use a new-ish version, like 5.9 or higher, I tested with 6.2 only)
 * An account and application in the [Dashboard](https://staging.thethingsnetwork.org/).
 
 ## Getting Started
@@ -26,17 +26,21 @@ It is completely self-contained: you can host it locally or deploy it to a provi
 
 ## Deploying
 
-Use [now](https://zeit.co/now)'s insanely awesome node.js service. Make sure you have installed `now` globally (`$ npm install -g now`).
+If you want to release this onto the big wide interwebs, you can use any node.js hosting provider out there, but I did this only to try out [now](https://zeit.co/now)'s insanely awesome one, so here's what I suggest.
 
-Login to now:
+- First make sure you have installed `now` globally:
 
-    $ now --login 
+        $ npm install -g now
 
-Deploy:
+- Login to `now`:
 
-    $ now
+        $ now --login 
 
-Profit!
+- Deploy:
+
+        $ now
+
+- Profit! :rocket:
 
 
 ## Credits
