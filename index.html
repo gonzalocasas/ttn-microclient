@@ -1,0 +1,265 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>The Things Network microclient</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,300,300italic,700,700italic">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/3.0.3/normalize.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.1.0/milligram.min.css">
+    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js"></script>
+    <style>
+      .wrapper {
+        position: relative;
+        display: block;
+        width: 100%;
+        overflow: hidden;
+      }
+
+      .container {
+        max-width: 80.0rem;
+        margin-bottom: 0;
+        padding: 2.5rem;
+        padding-bottom: 2.5rem;
+      }
+
+      .drop-shadow {
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+      }
+
+      .navigation {
+        background: #f4f5f6;
+        display: block;
+        height: 5.2rem;
+        width: 100%;
+
+        left: 0;
+        position: fixed;
+        right: 0;
+        top: 0;
+        max-width: 100vw;
+        z-index: 99;
+      }
+
+      .navigation .container {
+        padding-top: 0;
+        padding-bottom: 0;
+      }
+
+      .navigation .logo {
+        width: 10rem;
+        height: 5rem;
+        margin: 0.1rem 0;
+      }
+
+      .navigation .title {
+        font-size: 1.8rem;
+        font-weight: 100;
+        padding: 1.6rem 0 1.6rem 11rem;
+        margin: 0;
+      }
+
+      .header .container {
+        text-align: center;
+        padding: 8.5rem 2rem 0 2rem;
+      }
+
+      .connect {
+        max-height: 50rem;
+        transition: all cubic-bezier(.55,0,.1,1) 350ms;
+        overflow: hidden;
+        padding-top: 0;
+        padding-bottom: 0;
+      }
+
+      .hidden {
+        max-height: 0;
+      }
+
+      .feed {
+        list-style: none;
+      }
+
+      .activity {
+        background-color: #fafafa;
+        padding-bottom: 7.5rem;
+      }
+
+      .card {
+        background-color: white;
+        padding: 2rem;
+        border-radius: 2px;
+      }
+
+      .card .message {
+        margin-bottom: 0;
+        line-height: 1;
+        font-weight: bold;
+      }
+
+      .card .message-time {
+        margin-bottom: 1rem;
+        font-size: 0.5em;
+      }
+
+      .card dl {
+        margin-bottom: 0;
+      }
+
+      .card dt {
+        font-size: 1rem;
+        text-transform: uppercase;
+        margin: 0;
+      }
+      .card dd {
+        font-size: 1.3rem;
+        margin: 0 0 1rem 0;
+      }
+
+      footer {
+        background-color: black;
+        color: white;
+      }
+    </style>
+  </head>
+
+  <body>
+    <main class="wrapper">
+      <nav class="navigation drop-shadow">
+        <section class="container">
+          <img class="logo" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxOS4wLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiDQoJIHZpZXdCb3g9IjAgMCA3OTAgMTUwIiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCA3OTAgMTUwOyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+DQo8c3R5bGUgdHlwZT0idGV4dC9jc3MiPg0KCS5zdDB7ZmlsbDojMzMzMzMzO30NCgkuc3Qxe2ZpbGw6IzEwNzJCQTt9DQoJLnN0MntmaWxsOiMzNzM2MzY7fQ0KPC9zdHlsZT4NCjxnPg0KCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0zNjkuOSwxMzYuNGgtNy40di0zMi42aDcuNGwxMy4xLDIwLjNsMCwwdi0yMC4zaDcuNHYzMi42aC03LjRsLTEzLjEtMjAuM2wwLDBWMTM2LjR6Ii8+DQoJPHBhdGggY2xhc3M9InN0MCIgZD0iTTQ0Ny41LDExMC4yaC0xMS4zdjYuM0g0NDd2Ni42aC0xMC43djYuNmgxMS4zdjYuNmgtMTguN3YtMzIuNmgxOC43VjExMC4yeiIvPg0KCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik00ODMuMywxMDMuN2gyMi45djYuNmgtNy43djI2aC03LjR2LTI2aC03Ljd2LTYuNkg0ODMuM3oiLz4NCgk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNNTYyLjUsMTE4LjJsLTUuMiwxOC4zaC04LjJsLTkuMi0zMi42aDguMWw1LjUsMjIuNWgwLjFsNS45LTIyLjVoNS41bDUuOSwyMi41aDAuNWw1LjUtMjIuNWg4LjJsLTkuMiwzMi42DQoJCWgtOC4yTDU2Mi41LDExOC4yeiIvPg0KCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik02MzQuNCwxMDMuMmM5LjEsMCwxNi41LDcuNCwxNi41LDE2LjhjMCw5LjYtNywxNi45LTE2LjUsMTYuOWMtOS44LDAtMTYuNS03LjQtMTYuNS0xNi45DQoJCUM2MTcuOSwxMTAuNSw2MjUuMywxMDMuMiw2MzQuNCwxMDMuMnogTTYzNC40LDEyOS43YzUuOSwwLDguNC00LjgsOC40LTkuOGMwLTQuNy0yLjctOS44LTguNC05LjhjLTUuOCwwLTguNCw0LjgtOC40LDkuOA0KCQlDNjI2LDEyNC45LDYyOC40LDEyOS43LDYzNC40LDEyOS43eiIvPg0KCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik02OTkuNCwxMDMuN2M2LDAsMTAuNywzLjMsMTAuNyw5LjhjMCw0LjgtMi43LDguMi02LjcsOS4zbDExLjMsMTMuNmgtOS4zbC05LjktMTIuOXYxMi45SDY4OHYtMzIuNg0KCQlMNjk5LjQsMTAzLjdMNjk5LjQsMTAzLjd6IE02OTYsMTE4LjNjMi45LDAsNi0wLjEsNi00LjRzLTMuMy00LjQtNi00LjRoLTAuOHY4LjVoMC44VjExOC4zeiIvPg0KCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik03NjkuMSwxMzYuNEw3NTcsMTIyLjZ2MTMuOWgtNy40di0zMi42aDcuNHYxMy41bDExLjMtMTMuNWg5LjFMNzY0LDExOS4zbDE1LjEsMTcuMkg3NjkuMUw3NjkuMSwxMzYuNHoiLz4NCjwvZz4NCjxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik0yODYuNywxMTIuOGMwLjcsOC42LTIsMTYuNy03LjUsMjIuOWMtNS45LDYuNi0xNC43LDEwLjItMjQuNiwxMC4ySDQwLjNsMCwwYy0wLjEsMC0wLjIsMC0wLjMsMGgtMC4xaC0wLjJsMCwwDQoJYy04LjctMC4xLTE2LjktMy41LTIzLTkuNmMtNi41LTYuNC0xMC0xNS0xMC4xLTI0LjFsMCwwYzAtMTYuOSwxMS41LTMwLjYsMjcuMi0zMy4yYzIuMS0xNC4xLDE0LjQtMjUuNiwyOS42LTI4DQoJYzAuOS01LjYsMy42LTExLDcuOS0xNS40YzYuMi02LjQsMTQuNi0xMCwyMy4yLTEwYzExLjEsMCwyMC44LDYsMjYsMTVjNi4xLTIxLjgsMjYuMS0zNy44LDQ5LjgtMzcuOGMyNS45LDAsNDcuNSwxOS4yLDUxLjEsNDQuMg0KCWMxMy05LjcsMzAuMy04LjgsNDMuMywzLjRsLTEuNC0xLjJjMTAuNCw4LjQsMTQsMTkuOCwxMy41LDI5LjRjLTAuMyw1LjctMi4yLDEwLjctNS42LDE0LjhjMy4zLDEuMSw2LDMsOC42LDUuNg0KCWMzLjYsMy42LDYuMSw4LjEsNi44LDEzLjFsMCwwYzAsMC4yLDAsMC40LDAsMC42QzI4Ni43LDExMi41LDI4Ni43LDExMi42LDI4Ni43LDExMi44eiBNMzAyLjgsMzIuMWMtNy42LTEwLjMtMTguOS0xNy45LTMxLjMtMjEuMQ0KCWMtMi44LTAuNi01LjcsMS4zLTYuMyw0Yy0xLjEsMi44LDAuNyw2LjQsMy43LDdjMTIuNSwzLjMsMjMuMywxMi4xLDI5LDIzLjdjNC43LDkuNSw1LjksMjAuNywzLjMsMzFjLTAuNywyLjksMS40LDYsNC40LDYuNA0KCWMyLjcsMC44LDUuNy0wLjgsNi42LTMuNEMzMTYuMyw2My42LDMxMi44LDQ1LjUsMzAyLjgsMzIuMXogTTI2Ny4xLDMwLjVjLTQuMy0wLjgtNy42LDQuNS01LjcsOC4yYzAuNywxLjYsMi4zLDIuNyw0LDMuMQ0KCWM2LjUsMS43LDEyLjIsNi4yLDE1LjIsMTIuMmMyLjcsNS4zLDMuMywxMS41LDEuOCwxNy4yYy0wLjgsMi45LDEuMyw2LjEsNC4zLDYuNmMyLjcsMC44LDUuOS0wLjgsNi43LTMuNg0KCWMyLjgtMTAuMiwwLjctMjEuNi01LjUtMzAuMUMyODIuOSwzNy4zLDI3NS40LDMyLjEsMjY3LjEsMzAuNXoiLz4NCjxnPg0KCTxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik0zNTcuNiwzMC44aDM4LjF2MTAuOWgtMTIuOXY0My4zaC0xMi40VjQxLjZoLTEyLjlMMzU3LjYsMzAuOEwzNTcuNiwzMC44eiIvPg0KCTxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik00MTUuMiw4NS4xaC0xMi40VjMwLjhoMTIuNHYyMS43aDE3LjVWMzAuOEg0NDV2NTQuM2gtMTIuNFY2My4yaC0xNy41QzQxNS4yLDYzLjIsNDE1LjIsODUuMSw0MTUuMiw4NS4xeiIvPg0KCTxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik00ODYuNSw0MS44SDQ2OHYxMC43aDE3Ljl2MTAuOUg0Njh2MTAuOWgxOC43djEwLjloLTMxLjJWMzAuOGgzMS4xVjQxLjhMNDg2LjUsNDEuOHoiLz4NCgk8cGF0aCBjbGFzcz0ic3QyIiBkPSJNNTEwLjMsMzAuOGgzOC4xdjEwLjloLTEyLjl2NDMuM2gtMTIuNFY0MS42aC0xMi45TDUxMC4zLDMwLjhMNTEwLjMsMzAuOHoiLz4NCgk8cGF0aCBjbGFzcz0ic3QyIiBkPSJNNTY3LjksODUuMWgtMTIuNFYzMC44aDEyLjR2MjEuN2gxNy41VjMwLjhoMTIuNHY1NC4zaC0xMi40VjYzLjJoLTE3LjVWODUuMXoiLz4NCgk8cGF0aCBjbGFzcz0ic3QyIiBkPSJNNjIwLjcsODUuMWgtMTIuNFYzMC44aDEyLjRWODUuMXoiLz4NCgk8cGF0aCBjbGFzcz0ic3QyIiBkPSJNNjQzLjUsODUuMWgtMTIuNFYzMC44aDEyLjRsMjEuNCwzMy41aDAuMVYzMC44aDEyLjR2NTQuM2gtMTIuNGwtMjEuNC0zMy41aC0wLjFMNjQzLjUsODUuMUw2NDMuNSw4NS4xeiIvPg0KCTxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik03MzYuOSw2Ni40Yy0zLDEzLjctMTQuNCwxOS43LTI1LDE5LjdjLTE0LjYsMC0yNi40LTEyLjYtMjYuNC0yOGMwLTE1LjcsMTEuMy0yOCwyNi40LTI4DQoJCWM5LjYsMCwxNi4xLDMuNiwyMC45LDkuMmwtOC4xLDguOWMtMy4yLTUuMS03LjMtNi45LTEyLjEtNi45Yy03LjYsMC0xMy43LDcuNi0xMy43LDE2LjljMCw5LjIsNi4yLDE2LjYsMTMuNywxNi42DQoJCWM1LjksMCwxMS44LTMuOCwxMS44LTEwLjRoLTEyLjR2LTkuNmgyNXYxMS43SDczNi45eiIvPg0KCTxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik03ODAuNiwzNWwtNS4xLDkuOWMwLDAtNS40LTMuNy0xMC45LTMuN2MtNC4zLDAtNi4zLDEuOC02LjMsNC44czUuMiw1LjIsMTEuMyw3LjhjNiwyLjUsMTIuOCw3LjcsMTIuOCwxNC44DQoJCWMwLDEyLjktOS45LDE3LjUtMjAuNSwxNy41Yy0xMi44LDAtMjAuMy03LjMtMjAuMy03LjNsNi4yLTEwLjRjMCwwLDcuMyw2LDEzLjMsNmMyLjcsMCw3LjgtMC4zLDcuOC01LjRjMC0zLjgtNS44LTUuOC0xMi4yLTguOQ0KCQljLTYuNi0zLjItMTAuMy04LjItMTAuMy0xMy45YzAtMTAsOC45LTE2LjYsMTcuNi0xNi42Qzc3My42LDI5LjgsNzgwLjYsMzUsNzgwLjYsMzV6Ii8+DQo8L2c+DQo8L3N2Zz4NCg==" />
+          <a class="float-right">
+            <h1 class="title">microclient</h1>
+          </a>
+        </section>
+      </nav>
+      <header class="header">
+        <section class="container">
+          <p>
+            This is a really tiny client for <a href="https://thethingsnetwork.org">The Things Network</a>
+            mainly built as an excuse to try out <a href="https://zeit.co/now">now</a>'s mind-blowing service.
+          </p>
+        </section>
+      </header>
+      <section class="container connect">
+        <h3>Connect</h3>
+        <form action="/">
+          <fieldset>
+            <label for="app_eui">App EUI</label>
+            <input type="text" placeholder="App EUI" id="app_eui" name="app_eui">
+            <label for="access_key">Access Key</label>
+            <input type="password" placeholder="Access Key" id="access_key" name="access_key">
+            <input class="button-primary float-right" type="submit" value="Connect">
+          </fieldset>
+        </form>
+      </section>
+
+      <section class="container activity">
+        <h3>Activity</h3>
+
+        <ul class="feed">
+        </ul>
+
+        <button class="button button-clear float-right">Clear</button>
+      </section>
+
+      <footer>
+        <section class="container">
+          <p>built by <a target="_blank" href="https://twitter.com/gnz">@gnz</a> and licensed under <a target="_blank" href="https://github.com/gonzalocasas/ttn-microclient/blob/master/LICENSE">MIT license</a></p>
+        </section>
+      </footer>
+
+    </main>
+
+    <script>
+      var socket = io('/');
+
+      var addCard = function(message, data) {
+        // Create a new DOM elements
+        var newCard = document.createElement('li');
+        newCard.classList.add('card', 'drop-shadow');
+
+        var cardTitle = document.createElement('p');
+        cardTitle.classList.add('message');
+        cardTitle.innerText = message;
+        newCard.appendChild(cardTitle);
+
+        var cardTime = document.createElement('p');
+        cardTime.classList.add('message-time');
+        cardTime.innerText = moment().format('HH:mm');
+        newCard.appendChild(cardTime);
+
+        if (data) {
+          var fields = document.createElement('dl');
+          newCard.appendChild(fields);
+
+          for (var i in data) {
+            var fieldName = document.createElement('dt');
+            fieldName.innerText = i;
+            
+            var fieldValue = document.createElement('dd');
+            fieldValue.innerText = data[i];
+
+            fields.appendChild(fieldName);
+            fields.appendChild(fieldValue);
+          }
+
+        }
+
+        // Append to the activity feed
+        var feed = document.querySelector('.feed');
+        feed.insertBefore(newCard, feed.firstChild);
+      };
+
+      document.querySelector('form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        document.querySelector('section.connect').classList.add('hidden');
+
+        // Start connection to The Things Network
+        socket.emit('start', { appEUI: event.currentTarget.app_eui.value, accessKey: event.currentTarget.access_key.value });
+      });
+
+      document.querySelector('.button-clear').addEventListener('click', function(event) {
+        document.querySelector('.feed').innerHTML = '';
+      });
+
+      socket.on('ttn-connect', function (data) {
+        addCard('Connection successful');
+      });
+
+      socket.on('uplink', function (data) {
+        var details = {
+          server_time: moment(new Date(data.metadata.server_time)).format('MMM Do, HH:mm'),
+          devEUI: data.devEUI,
+          counter: data.counter,
+          gateway: data.metadata.gateway_eui,
+          frequency: data.metadata.frequency,
+          rssi: data.metadata.rssi,
+          datarate: data.metadata.datarate
+        };
+        var fields = data.fields;
+        
+        // Try to decode base64 to plain
+        if (fields.raw) {
+          try {
+            var payload = [], decoded = atob(fields.raw);
+            for (var i=0;i < decoded.length; i++) {
+              payload.push(('00' + decoded.charCodeAt(i).toString(16)).substr(-2));
+            }
+            fields.payload = payload.join(' ').toUpperCase();
+            fields.payload_plain = decoded;
+            delete fields.raw;
+          } catch(e) {}
+        }
+
+        addCard('Uplink received', Object.assign(fields, details));
+      });
+
+      socket.on('activation', function (data) {
+        addCard('Device activated', { devEUI: data.devEUI });
+      });
+    </script>
+  </body>  
+</html>

@@ -1,0 +1,25 @@
+{
+  "name": "ttn-microclient",
+  "version": "1.0.0",
+  "description": "The Things Network microclient",
+  "main": "server.js",
+  "dependencies": {
+    "express": "^4.14.0",
+    "socket.io": "^1.4.6",
+    "ttn": "^1.1.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gonzalocasas/ttn-microclient.git"
+  },
+  "author": "Gonzalo Casas <gonzalocasas@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gonzalocasas/ttn-microclient/issues"
+  },
+  "homepage": "https://github.com/gonzalocasas/ttn-microclient#readme"
+}
