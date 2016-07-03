@@ -229,6 +229,10 @@
         addCard('Connection successful');
       });
 
+      socket.on('ttn-error', function (data) {
+        addCard('Error', data);
+      });
+
       socket.on('uplink', function (data) {
         var details = {
           server_time: moment(new Date(data.metadata.server_time)).format('MMM Do, HH:mm'),

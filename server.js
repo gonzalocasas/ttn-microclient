@@ -40,9 +40,10 @@ io.on('connection', function (socket) {
       socket.emit('activation', evt)
     });
 
-    // Print errors to the console
+    // Forward errors
     client.on('error', function (err) {
-      console.log('Error: ' + err)
+      console.log('Error: ' + err);
+      socket.emit('ttn-error', { message: err.message });
     });
 
     // Close the TTN client on exit
