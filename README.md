@@ -9,7 +9,8 @@ It is completely self-contained: you can host it locally or deploy it to a provi
 
 * [Node.JS](https://nodejs.org/)
 * An account and application in the [Dashboard](https://staging.thethingsnetwork.org/).
-* Install dependencies:
+
+Install dependencies:
 
     $ npm install
 
