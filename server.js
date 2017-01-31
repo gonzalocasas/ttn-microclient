@@ -16,11 +16,11 @@ app.get('/', function (req, res) {
 io.on('connection', function (socket) {
 
   socket.on('start', function (data) {
-    var appEUI = data.appEUI;
-    console.log('Connecting to AppEUI: ' + appEUI);
+    var appId = data.appId;
+    console.log('Connecting to AppId: ' + appId);
 
     // Start the TTN Client
-    var client = new ttn.Client('staging.thethingsnetwork.org', appEUI, data.accessKey);
+    var client = new ttn.Client(data.region, appId, data.accessKey);
 
     // Forward connection ok
     client.on('connect', function (msg) {
@@ -29,9 +29,9 @@ io.on('connection', function (socket) {
     });
 
     // Forward uplink
-    client.on('uplink', function (msg) {
-      console.log('Uplink from Device: ' + msg.devEUI)
-      socket.emit('uplink', msg)
+    client.on('message', function (deviceId, data) {
+      console.log('Uplink from ' + deviceId + ': ' + data)
+      socket.emit('uplink', data)
     });
 
     // Forward activations

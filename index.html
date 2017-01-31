@@ -147,8 +147,10 @@
         <h3>Connect</h3>
         <form action="/">
           <fieldset>
-            <label for="app_eui">App EUI</label>
-            <input type="text" placeholder="App EUI" id="app_eui" name="app_eui">
+            <label for="region">Region</label>
+            <input type="text" placeholder="eu" id="region" name="region">
+            <label for="app_id">App ID</label>
+            <input type="text" placeholder="App ID" id="app_id" name="app_id">
             <label for="access_key">Access Key</label>
             <input type="password" placeholder="Access Key" id="access_key" name="access_key">
             <input class="button-primary float-right" type="submit" value="Connect">
@@ -167,7 +169,7 @@
 
       <footer>
         <section class="container">
-          <p>built by <a target="_blank" href="https://twitter.com/gnz">@gnz</a> and licensed under <a target="_blank" href="https://github.com/gonzalocasas/ttn-microclient/blob/master/LICENSE">MIT license</a></p>
+          <p>built by <a target="_blank" href="https://twitter.com/gnz">@gnz</a> &amp; <a target="_blank" href="https://github.com/h0l0gram/">h0l0gram</a> and licensed under <a target="_blank" href="https://github.com/gonzalocasas/ttn-microclient/blob/master/LICENSE">MIT license</a></p>
         </section>
       </footer>
 
@@ -218,7 +220,7 @@
         document.querySelector('section.connect').classList.add('hidden');
 
         // Start connection to The Things Network
-        socket.emit('start', { appEUI: event.currentTarget.app_eui.value, accessKey: event.currentTarget.access_key.value });
+        socket.emit('start', { appId: event.currentTarget.app_id.value, accessKey: event.currentTarget.access_key.value, region: event.currentTarget.region.value });
       });
 
       document.querySelector('.button-clear').addEventListener('click', function(event) {
@@ -234,31 +236,32 @@
       });
 
       socket.on('uplink', function (data) {
+	//console.log(data);
+	//console.dir(data);
+
         var details = {
-          server_time: moment(new Date(data.metadata.server_time)).format('MMM Do, HH:mm'),
-          devEUI: data.devEUI,
+          time: moment(new Date(data.metadata.time)).format('MMM Do, HH:mm'),
+          dev_id: data.dev_id,
           counter: data.counter,
-          gateway: data.metadata.gateway_eui,
+          gateways: data.metadata.gateways.map(function(gw) { return gw.gtw_id; }).join(', '),
+          rssi: data.metadata.gateways.map(function(gw) { return gw.rssi; }).join(', '),
+          snr: data.metadata.gateways.map(function(gw) { return gw.snr; }).join(', '),
+
           frequency: data.metadata.frequency,
-          rssi: data.metadata.rssi,
-          datarate: data.metadata.datarate
+          data_rate: data.metadata.data_rate
         };
-        var fields = data.fields;
         
         // Try to decode base64 to plain
-        if (fields.raw) {
+        if (data.payload_raw) {
           try {
-            var payload = [], decoded = atob(fields.raw);
-            for (var i=0;i < decoded.length; i++) {
-              payload.push(('00' + decoded.charCodeAt(i).toString(16)).substr(-2));
-            }
-            fields.payload = payload.join(' ').toUpperCase();
-            fields.payload_plain = decoded;
-            delete fields.raw;
-          } catch(e) {}
+            var decoded = String.fromCharCode.apply(null, new Uint8Array(data.payload_raw));
+            //fields.payload = payload.join(' ').toUpperCase();
+            details.payload_plain = decoded;
+          } catch(e) {
+            console.log(e);}
         }
 
-        addCard('Uplink received', Object.assign(fields, details));
+        addCard('Uplink received', details);
       });
 
       socket.on('activation', function (data) {
